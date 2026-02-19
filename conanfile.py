@@ -8,7 +8,7 @@ import os
 
 class PaimonCppConan(ConanFile):
     name = "paimon-cpp"
-    version = "0.9.0"
+    version = "0.1.0-bolt"
     package_type = "library"
     license = "Apache-2.0"
     url = "https://github.com/alibaba/paimon-cpp"  # informational
@@ -74,6 +74,24 @@ class PaimonCppConan(ConanFile):
         git = Git(self)
         # Use self.url from the recipe attributes
         git.clone(url=self.url, target=".", args=["--depth", "1", "--branch", self.version])
+
+    def export_sources(self):
+        """Export local build files and sources for recipe-based builds.
+
+        This ensures consumers can build from the exported sources without
+        relying on ExternalProject downloads.
+        """
+        patterns = [
+            "CMakeLists.txt",
+            "PaimonConfig.cmake.in",
+            "cmake_modules/*",
+            "src/*",
+            "include/*",
+            "third_party/roaring_bitmap/*",
+            "third_party/xxhash/*",
+        ]
+        for pattern in patterns:
+            copy(self, pattern=pattern, src=self.recipe_folder, dst=self.export_sources_folder)
 
     def layout(self):
         cmake_layout(self)
