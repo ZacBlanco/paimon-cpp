@@ -77,8 +77,8 @@ Result<std::shared_ptr<::parquet::WriterProperties>> ParquetWriterBuilder::Prepa
 
     PAIMON_ASSIGN_OR_RAISE(int64_t row_group_size, OptionsUtils::GetValueFromMap<int64_t>(
                                                        options_, PARQUET_BLOCK_SIZE,
-                                                       ::parquet::DEFAULT_MAX_ROW_GROUP_SIZE));
-    builder.max_row_group_size(row_group_size);
+                                                       ::parquet::DEFAULT_MAX_ROW_GROUP_LENGTH));
+    builder.max_row_group_length(row_group_size);
 
     PAIMON_ASSIGN_OR_RAISE(int64_t page_size,
                            OptionsUtils::GetValueFromMap<int64_t>(options_, PARQUET_PAGE_SIZE,

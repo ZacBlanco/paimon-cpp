@@ -31,8 +31,8 @@ class PaimonCppConan(ConanFile):
     default_options = {
         "shared": True,
         "fPIC": True,
-        "with_orc": True,
         "with_avro": True,
+        "with_orc": False,
         "with_lance": False,
         "with_jindo": False,
         "with_lumina": False,
@@ -46,7 +46,7 @@ class PaimonCppConan(ConanFile):
         Do not set package options here to avoid misconfiguration errors.
         """
         # Core dependencies
-        self.requires("arrow/15.0.1-oss")
+        self.requires("arrow/15.0.1-oss", transitive_headers=True, transitive_libs=True)
         self.requires("fmt/9.0.0")
         self.requires("onetbb/2021.12.0")
         self.requires("glog/0.7.1")
@@ -126,6 +126,24 @@ class PaimonCppConan(ConanFile):
             # If not present in graph yet, Conan will still apply the pattern
             # when hwloc enters via transitive requirements.
             pass
+
+        arrow_simd_level = "default"
+        if str(self.settings.arch) in ["x86", "x86_64"]:
+            arrow_simd_level = "avx2"
+        elif str(self.settings.arch) in ["armv8", "arm", "armv9"]:
+            arrow_simd_level = "neon"
+        arrow = "arrow/*"
+        self.options[arrow].parquet = True
+        self.options[arrow].dataset_modules = True
+        self.options[arrow].acero = True
+        self.options[arrow].simd_level = arrow_simd_level
+        self.options[arrow].with_re2 = True
+        self.options[arrow].with_lz4 = True
+        self.options[arrow].with_snappy = True
+        self.options[arrow].with_zlib = True
+        self.options[arrow].with_json = True
+        self.options[arrow].with_zstd = True
+        self.options[arrow].with_thrift = True
 
     def build(self):
         cmake = CMake(self)

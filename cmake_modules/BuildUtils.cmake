@@ -86,6 +86,19 @@ function(add_paimon_lib LIB_NAME)
         target_include_directories(${LIB_NAME}_objlib PRIVATE ${ARG_PRIVATE_INCLUDES})
     endif()
 
+    # Propagate INTERFACE include dirs from dependency targets into the objlib
+    set(_paimon_dep_targets ${ARG_DEPENDENCIES} ${ARG_STATIC_LINK_LIBS} ${ARG_SHARED_LINK_LIBS})
+    foreach(_dep IN LISTS _paimon_dep_targets)
+        if(TARGET ${_dep})
+            get_target_property(_dep_includes ${_dep} INTERFACE_INCLUDE_DIRECTORIES)
+            if(_dep_includes AND NOT _dep_includes STREQUAL "NOTFOUND")
+                target_include_directories(${LIB_NAME}_objlib SYSTEM PUBLIC ${_dep_includes})
+            endif()
+        endif()
+    endforeach()
+    unset(_dep)
+    unset(_dep_includes)
+
     set(RUNTIME_INSTALL_DIR bin)
 
     if(BUILD_SHARED)

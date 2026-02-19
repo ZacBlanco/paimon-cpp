@@ -19,7 +19,6 @@
 #include <string>
 #include <utility>
 
-#include "fmt/base.h"
 #include "fmt/core.h"
 #include "fmt/format.h"
 #include "fmt/ranges.h"
