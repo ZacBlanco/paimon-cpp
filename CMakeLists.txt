@@ -261,7 +261,57 @@ include_directories(src)
 # For generate_export_header() and add_compiler_export_flags().
 include(GenerateExportHeader)
 include(ExternalProject)
-include(ThirdpartyToolchain)
+
+# Prefer consuming dependencies provided by Conan (via CMakeDeps) when available.
+# This keeps existing target names by adding aliases that map to Conan-provided
+# targets, so downstream CMakeLists don't need wholesale edits.
+find_package(Arrow QUIET CONFIG)
+find_package(TBB QUIET CONFIG)
+find_package(fmt QUIET CONFIG)
+find_package(glog QUIET CONFIG)
+# RapidJSON is header-only; different recipes expose different target names.
+# Try config first, then module.
+find_package(RapidJSON QUIET CONFIG)
+if(NOT RapidJSON_FOUND)
+  find_package(RapidJSON QUIET)
+endif()
+
+set(PAIMON_USE_CONAN_DEPS OFF)
+if(TARGET Arrow::arrow AND TARGET TBB::tbb)
+  set(PAIMON_USE_CONAN_DEPS ON)
+endif()
+
+if(PAIMON_USE_CONAN_DEPS)
+  # Map legacy target names to Conan targets
+  if(TARGET Arrow::arrow AND NOT TARGET arrow)
+    add_library(arrow INTERFACE IMPORTED)
+    target_link_libraries(arrow INTERFACE Arrow::arrow)
+  endif()
+  if(TARGET TBB::tbb AND NOT TARGET tbb)
+    add_library(tbb INTERFACE IMPORTED)
+    target_link_libraries(tbb INTERFACE TBB::tbb)
+  endif()
+  if(TARGET fmt::fmt AND NOT TARGET fmt)
+    add_library(fmt INTERFACE IMPORTED)
+    target_link_libraries(fmt INTERFACE fmt::fmt)
+  endif()
+  if(TARGET glog::glog AND NOT TARGET glog)
+    add_library(glog INTERFACE IMPORTED)
+    target_link_libraries(glog INTERFACE glog::glog)
+    add_compile_definitions("GLOG_USE_GLOG_EXPORT")
+  endif()
+  if((TARGET RapidJSON::RapidJSON OR TARGET rapidjson) AND NOT TARGET RapidJSON)
+    add_library(RapidJSON INTERFACE IMPORTED)
+    if(TARGET RapidJSON::RapidJSON)
+      target_link_libraries(RapidJSON INTERFACE RapidJSON::RapidJSON)
+    else()
+      target_link_libraries(RapidJSON INTERFACE rapidjson)
+    endif()
+  endif()
+else()
+  # Fallback to original ExternalProject-based toolchain
+  include(ThirdpartyToolchain)
+endif()
 
 add_custom_target(paimon_dependencies)
 
@@ -326,11 +376,13 @@ if(PAIMON_ENABLE_LUMINA)
     include_directories("${CMAKE_SOURCE_DIR}/third_party/lumina/include")
 endif()
 
-include_directories(SYSTEM ${ARROW_INCLUDE_DIR})
-include_directories(SYSTEM ${TBB_INCLUDE_DIR})
+if(NOT PAIMON_USE_CONAN_DEPS)
+  include_directories(SYSTEM ${ARROW_INCLUDE_DIR})
+  include_directories(SYSTEM ${TBB_INCLUDE_DIR})
 
-include_directories(SYSTEM ${GLOG_INCLUDE_DIR})
-add_compile_definitions("GLOG_USE_GLOG_EXPORT")
+  include_directories(SYSTEM ${GLOG_INCLUDE_DIR})
+  add_compile_definitions("GLOG_USE_GLOG_EXPORT")
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
