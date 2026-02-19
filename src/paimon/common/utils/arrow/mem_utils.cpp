@@ -35,20 +35,21 @@ class ArrowMemPoolAdaptor : public arrow::MemoryPool {
 
     arrow::Status Allocate(int64_t size, int64_t alignment, uint8_t** out) override {
         *out = reinterpret_cast<uint8_t*>(pool_.Malloc(size, alignment));
-        stats_.DidAllocateBytes(size);
+        stats_.UpdateAllocatedBytes(size);
         return arrow::Status::OK();
     }
 
     arrow::Status Reallocate(int64_t old_size, int64_t new_size, int64_t alignment,
                              uint8_t** ptr) override {
         *ptr = reinterpret_cast<uint8_t*>(pool_.Realloc(*ptr, old_size, new_size, alignment));
-        stats_.DidReallocateBytes(old_size, new_size);
+        stats_.UpdateAllocatedBytes(old_size, true);
+        stats_.UpdateAllocatedBytes(new_size, false);
         return arrow::Status::OK();
     }
 
     void Free(uint8_t* buffer, int64_t size, int64_t alignment) override {
         pool_.Free(buffer, size, alignment);
-        stats_.DidFreeBytes(size);
+        stats_.UpdateAllocatedBytes(size, true);
     }
 
     int64_t bytes_allocated() const override {

@@ -40,3 +40,17 @@ add_paimon_lib(paimon_file_index
                paimon_shared
                SHARED_LINK_FLAGS
                ${PAIMON_VERSION_SCRIPT_FLAGS})
+
+# Ensure the objlib sees dependency include directories (Arrow, fmt)
+if(TARGET Arrow::arrow)
+    target_include_directories(paimon_file_index_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:Arrow::arrow,INTERFACE_INCLUDE_DIRECTORIES>)
+elseif(TARGET arrow::arrow)
+    target_include_directories(paimon_file_index_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:arrow::arrow,INTERFACE_INCLUDE_DIRECTORIES>)
+elseif(TARGET arrow)
+    target_include_directories(paimon_file_index_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:arrow,INTERFACE_INCLUDE_DIRECTORIES>)
+endif()
+if(TARGET fmt::fmt)
+    target_include_directories(paimon_file_index_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>)
+elseif(TARGET fmt)
+    target_include_directories(paimon_file_index_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:fmt,INTERFACE_INCLUDE_DIRECTORIES>)
+endif()

@@ -44,6 +44,23 @@ add_paimon_lib(paimon_parquet_file_format
                SHARED_LINK_FLAGS
                ${PAIMON_VERSION_SCRIPT_FLAGS})
 
+# Ensure the objlib sees dependency include directories from Arrow/parquet/fmt
+if(TARGET Arrow::arrow)
+    target_include_directories(paimon_parquet_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:Arrow::arrow,INTERFACE_INCLUDE_DIRECTORIES>)
+elseif(TARGET arrow::arrow)
+    target_include_directories(paimon_parquet_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:arrow::arrow,INTERFACE_INCLUDE_DIRECTORIES>)
+elseif(TARGET arrow)
+    target_include_directories(paimon_parquet_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:arrow,INTERFACE_INCLUDE_DIRECTORIES>)
+endif()
+if(TARGET parquet)
+    target_include_directories(paimon_parquet_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:parquet,INTERFACE_INCLUDE_DIRECTORIES>)
+endif()
+if(TARGET fmt::fmt)
+    target_include_directories(paimon_parquet_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>)
+elseif(TARGET fmt)
+    target_include_directories(paimon_parquet_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:fmt,INTERFACE_INCLUDE_DIRECTORIES>)
+endif()
+
 if(PAIMON_BUILD_TESTS)
     add_paimon_test(parquet_format_test
                     SOURCES

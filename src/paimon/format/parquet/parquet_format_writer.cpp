@@ -89,7 +89,7 @@ Result<bool> ParquetFormatWriter::ReachTargetSize(bool suggested_check, int64_t 
 
 Result<uint64_t> ParquetFormatWriter::GetEstimateLength() const {
     PAIMON_ASSIGN_OR_RAISE_FROM_ARROW(int64_t written_bytes, out_->Tell());
-    return writer_->GetBufferedSize() + written_bytes;
+    return written_bytes;
 }
 
 ParquetFormatWriter::ParquetFormatWriter(std::unique_ptr<::parquet::arrow::FileWriter> writer,
