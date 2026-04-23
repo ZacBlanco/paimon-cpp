@@ -687,10 +687,17 @@ Result<bool> FileStoreCommitImpl::TryCommitOnce(
     std::optional<std::string> statistics;
     int64_t changelog_record_count = 0;
     int64_t schema_id = 0;
-    PAIMON_ASSIGN_OR_RAISE(std::optional<std::shared_ptr<TableSchema>> table_schema,
-                           schema_manager_->Latest());
+    std::shared_ptr<TableSchema> table_schema;
+    {
+        auto _schema_result = schema_manager_->Latest();
+        PAIMON_RETURN_IF_(!_schema_result.ok(), std::move(_schema_result).status(),
+                          "schema_manager_->Latest()");
+        if (_schema_result.value().has_value()) {
+            table_schema = std::move(_schema_result.value()).value();
+        }
+    }
     if (table_schema) {
-        schema_id = table_schema.value()->Id();
+        schema_id = table_schema->Id();
     }
 
     Snapshot new_snapshot(
