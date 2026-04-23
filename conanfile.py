@@ -223,9 +223,17 @@ class PaimonCppConan(ConanFile):
             fmt_orc.set_property("cmake_target_name", "Paimon::format_orc")
 
         if bool(self.options.with_avro):
+            # Expose internal Avro C++ static library as a component.
+            # The library is built by ExternalProject (ThirdpartyToolchain.cmake)
+            # and installed via install(TARGETS avro ...) into lib/ and include/.
+            avro_comp = self.cpp_info.components["avro"]
+            avro_comp.libs = ["avrocpp_s"]
+            avro_comp.set_property("cmake_target_name", "Paimon::libavrocpp")
+            avro_comp.includedirs = ["include"]
+
             fmt_avro = self.cpp_info.components["format_avro"]
             fmt_avro.libs = ["paimon_avro_file_format"]
-            fmt_avro.requires = ["core"]
+            fmt_avro.requires = ["core", "avro"]
             fmt_avro.set_property("cmake_target_name", "Paimon::format_avro")
 
         if bool(self.options.with_lance):

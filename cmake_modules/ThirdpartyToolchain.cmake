@@ -1062,6 +1062,16 @@ macro(build_avro)
     target_include_directories(avro INTERFACE ${AVRO_INCLUDE_DIR})
     target_link_libraries(avro INTERFACE zlib zstd snappy)
     add_dependencies(avro avro_ep)
+
+    # Install avro external project output so Conan can package it.
+    # Use file-based install (not install(TARGETS)) to avoid issues where
+    # the IMPORTED target may not be fully registered at configure time
+    # in certain build contexts (e.g., conan build .).
+    install(FILES "${AVRO_STATIC_LIB}"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(DIRECTORY "${AVRO_INCLUDE_DIR}/"
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            FILES_MATCHING PATTERN "*.h")
 endmacro()
 
 macro(build_orc)
