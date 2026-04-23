@@ -50,7 +50,7 @@ class PaimonCppConan(ConanFile):
         self.requires("fmt/9.0.0")
         self.requires("onetbb/2021.12.0")
         self.requires("glog/0.7.1")
-        self.requires("rapidjson/1.1.0")
+        self.requires("rapidjson/cci.20250205", force=True)
         self.requires("zlib/1.2.13")
         self.requires("zstd/1.5.7")
         self.requires("lz4/1.9.4")
@@ -125,11 +125,11 @@ class PaimonCppConan(ConanFile):
 
         if "fPIC" in self.options:
             tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(self.options.fPIC)
-
+        tc.variables["PAIMON_USE_CONAN_DEPS"] = True
         tc.generate()
-        # Provide find_package configs for declared requirements
-        deps = CMakeDeps(self)
-        deps.generate()
+        # generate conantoolchain.cmake & xxx-config.cmake
+        CMakeDeps(self).generate()
+
 
     def configure(self):
         """Adjust transitive dependency options required by recipes.

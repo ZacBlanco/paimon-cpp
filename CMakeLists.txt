@@ -279,29 +279,19 @@ include(GenerateExportHeader)
 # controlled inside ThirdpartyToolchain.
 include(ExternalProject)
 
-# Prefer consuming dependencies provided by Conan (via CMakeDeps) when available.
-# This keeps existing target names by adding aliases that map to Conan-provided
-# targets, so downstream CMakeLists don't need wholesale edits.
-find_package(Arrow QUIET CONFIG)
-find_package(arrow QUIET CONFIG)
-find_package(Parquet QUIET CONFIG)
-find_package(TBB QUIET CONFIG)
-find_package(fmt QUIET CONFIG)
-find_package(glog QUIET CONFIG)
-# RapidJSON is header-only; different recipes expose different target names.
-# Try config first, then module.
-find_package(RapidJSON QUIET CONFIG)
-if(NOT RapidJSON_FOUND)
-  find_package(RapidJSON QUIET)
-endif()
-
-set(PAIMON_USE_CONAN_DEPS OFF)
-# If Arrow is found via Conan's CMakeDeps, prefer Conan-managed deps.
-if(Arrow_FOUND OR arrow_FOUND OR TARGET Arrow::arrow OR TARGET arrow::arrow OR TARGET arrow)
-  set(PAIMON_USE_CONAN_DEPS ON)
-endif()
-
 if(PAIMON_USE_CONAN_DEPS)
+  # Prefer consuming dependencies provided by Conan (via CMakeDeps) when available.
+  # This keeps existing target names by adding aliases that map to Conan-provided
+  # targets, so downstream CMakeLists don't need wholesale edits.
+  find_package(Arrow QUIET CONFIG)
+  find_package(arrow QUIET CONFIG)
+  find_package(Parquet QUIET CONFIG)
+  find_package(TBB QUIET CONFIG)
+  find_package(fmt QUIET CONFIG)
+  find_package(glog QUIET CONFIG)
+  # RapidJSON is header-only; different recipes expose different target names.
+  # Try config first, then module.
+  find_package(RapidJSON REQUIRED CONFIG)
   # Map legacy target names to Conan targets
   if((TARGET Arrow::arrow OR TARGET arrow::arrow) AND NOT TARGET arrow)
     add_library(arrow INTERFACE IMPORTED)
