@@ -184,6 +184,18 @@ class PaimonCppConan(ConanFile):
         core.libs = ["paimon"]
         core.set_property("cmake_target_name", "Paimon::core")
         core.includedirs = ["include"]
+        # roaring_bitmap and xxhash are static libs linked into paimon;
+        # consumers linking the static paimon lib must also link these.
+        core.requires = ["roaring_bitmap", "xxhash"]
+
+        # Internal static libraries (no headers to export — included via paimon's include/)
+        rb = self.cpp_info.components["roaring_bitmap"]
+        rb.libs = ["roaring_bitmap"]
+        rb.set_property("cmake_target_name", "Paimon::roaring_bitmap")
+
+        xh = self.cpp_info.components["xxhash"]
+        xh.libs = ["xxhash"]
+        xh.set_property("cmake_target_name", "Paimon::xxhash")
 
         # Many targets link libdl + pthread somewhere in the chain on Linux.
         if str(self.settings.os) == "Linux":

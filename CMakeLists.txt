@@ -477,6 +477,15 @@ set(PAIMON_SHARED_PRIVATE_LINK_LIBS ${PAIMON_STATIC_LINK_LIBS})
 add_subdirectory(third_party/roaring_bitmap EXCLUDE_FROM_ALL)
 add_subdirectory(third_party/xxhash EXCLUDE_FROM_ALL)
 
+# Install internal static libraries so consumers of the packaged paimon can
+# resolve symbols when linking against libpaimon.a (static).
+# Use install(FILES) rather than install(TARGETS) for reliability in all
+# build contexts including conan build .
+install(FILES $<TARGET_FILE:roaring_bitmap>
+        DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES $<TARGET_FILE:xxhash>
+        DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 if(PAIMON_ENABLE_LANCE)
     add_subdirectory(third_party/lance EXCLUDE_FROM_ALL)
     link_directories(third_party/lance/lance_lib/target/release)
