@@ -325,7 +325,6 @@ add_paimon_lib(paimon
                ${PAIMON_COMMON_SRCS}
                ${PAIMON_CORE_SRCS}
                EXTRA_INCLUDES
-               ${PAIMON_DEPS_INCLUDES}
                DEPENDENCIES
                arrow
                tbb

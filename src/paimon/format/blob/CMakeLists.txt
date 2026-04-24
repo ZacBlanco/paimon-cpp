@@ -31,6 +31,7 @@ add_paimon_lib(paimon_blob_file_format
                paimon_shared
                SHARED_LINK_FLAGS
                ${PAIMON_VERSION_SCRIPT_FLAGS})
+
 if(PAIMON_BUILD_TESTS)
     add_paimon_test(blob_format_test
                     SOURCES

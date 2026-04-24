@@ -22,7 +22,6 @@ add_paimon_lib(paimon_local_file_system
                paimon_shared
                STATIC_LINK_LIBS
                fmt
-               arrow
                SHARED_LINK_LIBS
                paimon_shared
                SHARED_LINK_FLAGS

@@ -29,6 +29,8 @@ if(PAIMON_ENABLE_AVRO)
     add_paimon_lib(paimon_avro_file_format
                    SOURCES
                    ${PAIMON_AVRO_FILE_FORMAT}
+                   EXTRA_INCLUDES
+                   ${AVRO_INCLUDE_DIR}
                    DEPENDENCIES
                    paimon_shared
                    avro
