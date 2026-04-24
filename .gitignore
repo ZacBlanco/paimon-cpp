@@ -51,3 +51,4 @@ third_party/*.tar.gz
 
 # conan-generated presets
 CMakeUserPresets.json
+.clangd
