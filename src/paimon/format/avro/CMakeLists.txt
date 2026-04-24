@@ -45,23 +45,6 @@ if(PAIMON_ENABLE_AVRO)
                    SHARED_LINK_FLAGS
                    ${PAIMON_VERSION_SCRIPT_FLAGS})
 
-    # Ensure the objlib sees dependency include directories (Arrow, Avro, fmt)
-    if(TARGET Arrow::arrow)
-        target_include_directories(paimon_avro_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:Arrow::arrow,INTERFACE_INCLUDE_DIRECTORIES>)
-    elseif(TARGET arrow::arrow)
-        target_include_directories(paimon_avro_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:arrow::arrow,INTERFACE_INCLUDE_DIRECTORIES>)
-    elseif(TARGET arrow)
-        target_include_directories(paimon_avro_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:arrow,INTERFACE_INCLUDE_DIRECTORIES>)
-    endif()
-    if(TARGET avro)
-        target_include_directories(paimon_avro_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:avro,INTERFACE_INCLUDE_DIRECTORIES>)
-    endif()
-    if(TARGET fmt::fmt)
-        target_include_directories(paimon_avro_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>)
-    elseif(TARGET fmt)
-        target_include_directories(paimon_avro_file_format_objlib SYSTEM PUBLIC $<TARGET_PROPERTY:fmt,INTERFACE_INCLUDE_DIRECTORIES>)
-    endif()
-
     if(PAIMON_BUILD_TESTS)
         add_paimon_test(avro_format_test
                         SOURCES
