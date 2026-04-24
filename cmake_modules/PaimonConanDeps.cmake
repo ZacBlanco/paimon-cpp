@@ -37,21 +37,42 @@ macro(paimon_setup_conan_deps)
     find_package(snappy QUIET CONFIG)
     find_package(Protobuf QUIET CONFIG)
 
+    # --- Helper: get the config suffix from the active build type ---
+    # Conan generates variables like <pkg>_INCLUDE_DIRS_RELEASE or _DEBUG.
+    # Map CMAKE_BUILD_TYPE to the suffix Conan uses.
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_PAIMON_CONAN_CONFIG_SUFFIX "_DEBUG")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        # Conan doesn't generate RelWithDebInfo data files; fall back to Release
+        set(_PAIMON_CONAN_CONFIG_SUFFIX "_RELEASE")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+        set(_PAIMON_CONAN_CONFIG_SUFFIX "_RELEASE")
+    else()
+        # Default to Release (covers empty CMAKE_BUILD_TYPE and unknown types)
+        set(_PAIMON_CONAN_CONFIG_SUFFIX "_RELEASE")
+    endif()
+
+    # --- Helper: get a Conan variable that has a config suffix ---
+    # Usage: _paimon_conan_var(RESULT_VAR pkg_VAR_NAME)
+    # e.g.:  _paimon_conan_var(ARROW_INCLUDE_DIR arrow_INCLUDE_DIRS)
+    # This expands to ${arrow_INCLUDE_DIRS_RELEASE} or ${arrow_INCLUDE_DIRS_DEBUG}
+    macro(_paimon_conan_var result_var pkg_var_base)
+        set(${result_var} ${${pkg_var_base}${_PAIMON_CONAN_CONFIG_SUFFIX}})
+    endmacro()
+
     # --- Populate *_INCLUDE_DIR variables (same names ThirdpartyToolchain uses) ---
-    # Conan CMakeDeps generates <pkg>_INCLUDE_DIRS_RELEASE with plain paths.
+    # Conan CMakeDeps generates <pkg>_INCLUDE_DIRS_<CONFIG> with plain paths.
     # These are set by the *-data.cmake files that find_package() includes.
     # Note: variable names use the Conan package name (e.g. onetbb not TBB).
-    set(ARROW_INCLUDE_DIR  ${arrow_INCLUDE_DIRS_RELEASE})
-    set(TBB_INCLUDE_DIR    ${onetbb_INCLUDE_DIRS_RELEASE})
-    set(FMT_INCLUDE_DIR    ${fmt_INCLUDE_DIRS_RELEASE})
-    set(GLOG_INCLUDE_DIR   ${glog_INCLUDE_DIRS_RELEASE})
-    set(LZ4_INCLUDE_DIR    ${lz4_INCLUDE_DIRS_RELEASE})
-    set(SNAPPY_INCLUDE_DIR ${snappy_INCLUDE_DIRS_RELEASE})
-    set(ZSTD_INCLUDE_DIR   ${zstd_INCLUDE_DIRS_RELEASE})
-    set(ZLIB_INCLUDE_DIR   ${zlib_INCLUDE_DIRS_RELEASE})
-
-    # RapidJSON's variable name is lowercase (rapidjson not RapidJSON)
-    set(RAPIDJSON_INCLUDE_DIR ${rapidjson_INCLUDE_DIRS_RELEASE})
+    _paimon_conan_var(ARROW_INCLUDE_DIR  arrow_INCLUDE_DIRS)
+    _paimon_conan_var(TBB_INCLUDE_DIR    onetbb_INCLUDE_DIRS)
+    _paimon_conan_var(FMT_INCLUDE_DIR    fmt_INCLUDE_DIRS)
+    _paimon_conan_var(GLOG_INCLUDE_DIR   glog_INCLUDE_DIRS)
+    _paimon_conan_var(LZ4_INCLUDE_DIR    lz4_INCLUDE_DIRS)
+    _paimon_conan_var(SNAPPY_INCLUDE_DIR snappy_INCLUDE_DIRS)
+    _paimon_conan_var(ZSTD_INCLUDE_DIR   zstd_INCLUDE_DIRS)
+    _paimon_conan_var(ZLIB_INCLUDE_DIR   zlib_INCLUDE_DIRS)
+    _paimon_conan_var(RAPIDJSON_INCLUDE_DIR rapidjson_INCLUDE_DIRS)
 
     # --- Create unified alias targets (same names ThirdpartyToolchain uses) ---
     # Must be INTERFACE IMPORTED with explicit target_link_libraries.
