@@ -319,12 +319,10 @@ set(PAIMON_CORE_SRCS
     core/utils/special_field_ids.cpp
     core/utils/tag_manager.cpp)
 
-
 add_paimon_lib(paimon
                SOURCES
                ${PAIMON_COMMON_SRCS}
                ${PAIMON_CORE_SRCS}
-               EXTRA_INCLUDES
                DEPENDENCIES
                arrow
                tbb
@@ -711,4 +709,3 @@ if(PAIMON_BUILD_TESTS)
                     ${GTEST_LINK_TOOLCHAIN})
 
 endif()
-
